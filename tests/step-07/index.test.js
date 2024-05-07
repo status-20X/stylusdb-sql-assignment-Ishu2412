@@ -1,10 +1,9 @@
 const { readCSV } = require("../../src/csvReader");
-const { executeSELECTQuery } = require("../../src/queryExecutor");
-const { parseJoinClause, parseSelectQuery } = require("../../src/queryParser");
+const { parseSelectQuery } = require("../../src/queryParser");
+const { executeSELECTQuery } = require("../../src/index");
 
 test("Read CSV File", async () => {
   const data = await readCSV("./student.csv");
-
   expect(data.length).toBeGreaterThan(0);
   expect(data.length).toBe(4);
   expect(data[0].name).toBe("John");
@@ -14,7 +13,6 @@ test("Read CSV File", async () => {
 test("Parse SQL Query", () => {
   const query = "SELECT id, name FROM student";
   const parsed = parseSelectQuery(query);
-
   expect(parsed).toEqual({
     fields: ["id", "name"],
     table: "student",
@@ -39,6 +37,7 @@ test("Execute SQL Query", async () => {
   expect(result[0]).not.toHaveProperty("age");
   expect(result[0]).toEqual({ id: "1", name: "John" });
 });
+
 test("Parse SQL Query with WHERE Clause", () => {
   const query = "SELECT id, name FROM student WHERE age = 25";
   const parsed = parseSelectQuery(query);
@@ -62,6 +61,7 @@ test("Parse SQL Query with WHERE Clause", () => {
     isDistinct: false,
   });
 });
+
 test("Execute SQL Query with WHERE Clause", async () => {
   const query = "SELECT id, name FROM student WHERE age = 25";
   const result = await executeSELECTQuery(query);
@@ -100,12 +100,13 @@ test("Parse SQL Query with Multiple WHERE Clauses", () => {
   });
 });
 
-test("Execute SQL Query with Complex WHERE Clause", async () => {
+test("Execute SQL Query with Multiple WHERE Clause", async () => {
   const query = "SELECT id, name FROM student WHERE age = 30 AND name = John";
   const result = await executeSELECTQuery(query);
   expect(result.length).toBe(1);
   expect(result[0]).toEqual({ id: "1", name: "John" });
 });
+
 test("Execute SQL Query with Greater Than", async () => {
   const queryWithGT = "SELECT id FROM student WHERE age > 22";
   const result = await executeSELECTQuery(queryWithGT);
